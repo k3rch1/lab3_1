@@ -22,6 +22,13 @@ private:
         std::unique_ptr<node> right;
 
         explicit node(const T& value) : value_(value) {};
+
+        bool operator==(const node& other) const {
+            if (value_ != other.value_) return false;
+            if ((left == nullptr) != (other.left == nullptr) || (right == nullptr) != (other.right == nullptr)) return false;
+
+            return (!left || *left == *other.left) && (!right || *right == *other.right);
+        }
     };
 
     std::unique_ptr<node> root_;
@@ -30,6 +37,8 @@ private:
     void traverse_impl(const node* cur, F& func, const traversal_order& order) const;
 
     std::unique_ptr<node> copy_impl(const node* cur);
+
+    const node* find_node(const T& value) const;
 
 public:
     binary_search_tree() = default;
@@ -42,6 +51,8 @@ public:
     binary_search_tree& operator=(const binary_search_tree& other);
     binary_search_tree& operator=(binary_search_tree&& other);
 
+    bool operator==(const binary_search_tree<T>& other) const;
+
     bool empty() const noexcept;
     void clear() noexcept;
 
@@ -53,6 +64,18 @@ public:
     
     template <class F>
     void traverse(F func, traversal_order order) const;
+
+    template <class F>
+    auto map(F func) const;
+
+    template <class F>
+    binary_search_tree<T> filter(F predicate) const;
+
+    template <class F, class U>
+    U reduce(F func, U init, traversal_order order) const;
+
+    binary_search_tree<T> extract_subtree(const T& value) const;
+    bool contains_subtree(const binary_search_tree<T>& other) const;
 };
 
 template <class T>
@@ -99,26 +122,7 @@ void binary_search_tree<T>::insert(const T& value) {
 
 template <class T>
 bool binary_search_tree<T>::contains(const T& value) const {
-    if (!root_) {
-        return false;
-    }
-
-    node* cur = root_.get();
-    while (true) {
-        if (cur->value_ < value) {
-            if (cur->right) cur = cur->right.get();
-            else {
-                return false;
-            }
-            
-        }
-        else if (value < cur->value_) {
-            if (cur->left) cur = cur->left.get();
-            else {
-                return false;
-            }
-        } else return true;
-    }
+    return find_node(value) != nullptr;
 }
 
 template <class T>
@@ -236,4 +240,79 @@ binary_search_tree<T>& binary_search_tree<T>::operator=(binary_search_tree<T>&& 
     }
 
     return *this;
+}
+
+template <class T>
+template <class F>
+auto binary_search_tree<T>::map(F func) const {
+    binary_search_tree<decltype(func(std::declval<T>()))> result;
+
+    traverse([&](const T& value) {
+        result.insert(func(value));
+    }, traversal_order::KLP);
+
+    return result;
+}
+
+template <class T>
+template <class F>
+binary_search_tree<T> binary_search_tree<T>::filter(F predicate) const {
+    binary_search_tree<T> result;
+
+    traverse([&](const T& value) {
+        if (predicate(value)) result.insert(value);
+    }, traversal_order::KLP);
+
+    return result;
+}
+
+template <class T>
+template <class F, class U>
+U binary_search_tree<T>::reduce(F func, U init, traversal_order order) const {
+    U result = init;
+
+    traverse([&](const T& value) {
+        result = func(result, value);
+    }, order);
+
+    return result;
+}
+
+template <class T>
+const typename binary_search_tree<T>::node* binary_search_tree<T>::find_node(const T& value) const {
+    const node* cur = root_.get();
+
+    while (cur) {
+        if (cur->value_ < value) cur = cur->right.get();
+        else if (value < cur->value_) cur = cur->left.get();
+        else return cur;
+    }
+
+    return nullptr;
+}
+
+template<class T>
+binary_search_tree<T> binary_search_tree<T>::extract_subtree(const T& value) const {
+    const node* found = find_node(value);
+    binary_search_tree<T> res;
+    res.root_ = copy_impl(found);
+
+    return res;
+}
+
+template <class T>
+bool binary_search_tree<T>::contains_subtree(const binary_search_tree<T>& other) const {
+    if (other.empty()) return true;
+
+    const node* cur = find_node(other.root_->value_);
+
+    return cur && *cur == *other.root_;
+}
+
+template <class T>
+bool binary_search_tree<T>::operator==(const binary_search_tree<T>& other) const {
+    if (this == &other) return true;
+    if (!root_ || !other.root_) return false;
+
+    return *root_ == *other.root_;
 }
