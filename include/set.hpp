@@ -86,7 +86,8 @@ set<T> set<T>::operator|(const set<T>& other) const {
     other.tree_.traverse(
         [&res](const T& value) {
             res.insert(value);
-        }
+        },
+        binary_search_tree<T>::traversal_order::KLP
     );
 
     return res;
@@ -120,7 +121,8 @@ set<T>& set<T>::operator|=(const set<T>& other) {
     other.tree_.traverse(
         [this](const T& value) {
             insert(value);
-        }
+        },
+        binary_search_tree<T>::traversal_order::KLP
     );
 
     return *this;
@@ -129,9 +131,10 @@ set<T>& set<T>::operator|=(const set<T>& other) {
 template<class T>
 set<T>& set<T>::operator|=(set<T>&& other) {
     other.tree_.traverse(
-        [this](T& value) {
-            insert(std::move(value));
-        }
+        [this](const T& value) {
+            insert(value);
+        },
+        binary_search_tree<T>::traversal_order::KLP
     );
 
     return *this;

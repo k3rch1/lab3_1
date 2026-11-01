@@ -8,6 +8,7 @@ enable_testing()
 add_executable(
     tests
     binary_search_tree_tests.cpp
+    set_tests.cpp
 )
 
 target_include_directories(tests PRIVATE
