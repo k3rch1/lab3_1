@@ -19,12 +19,12 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/subs/lab5)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
 
-#add_executable(gui 
-#    src/main.cpp
-#    src/gui/main_window.cpp
-#    include/main_window.hpp
-#)
+add_executable(gui 
+    src/main.cpp
+    src/gui/main_window.cpp
+    include/main_window.hpp
+)
 
-#target_include_directories(gui PRIVATE include)
+target_include_directories(gui PRIVATE include)
 
-#target_link_libraries(gui PRIVATE Qt6::Widgets lab5)
+target_link_libraries(gui PRIVATE Qt6::Widgets lab5)

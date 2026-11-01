@@ -7,6 +7,8 @@ private:
     binary_search_tree<T> tree_;
 
 public:
+    using traversal_order = typename binary_search_tree<T>::traversal_order;
+
     set() = default;
     set(std::initializer_list<T> init) : tree_(init) {}
 
@@ -26,6 +28,11 @@ public:
 
     bool empty() const noexcept;
     size_t size() const;
+
+    template<class F>
+    void traverse(F func, traversal_order order) const {
+        tree_.traverse(func, order);
+    }
 
     set operator|(const set& other) const;
     set operator&(const set& other) const;
