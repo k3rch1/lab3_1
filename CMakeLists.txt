@@ -13,16 +13,18 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-add_subdirectory(subs/lab5)
+enable_testing()
 
-add_subdirectory(tests)
+add_subdirectory(${CMAKE_SOURCE_DIR}/subs/lab5)
 
-add_executable(gui 
-    src/main.cpp
-    src/gui/main_window.cpp
-    include/main_window.hpp
-)
+add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
 
-target_include_directories(gui PRIVATE include)
+#add_executable(gui 
+#    src/main.cpp
+#    src/gui/main_window.cpp
+#    include/main_window.hpp
+#)
 
-target_link_libraries(gui PRIVATE Qt6::Widgets lab5)
+#target_include_directories(gui PRIVATE include)
+
+#target_link_libraries(gui PRIVATE Qt6::Widgets lab5)

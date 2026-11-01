@@ -37,7 +37,7 @@ private:
     template <class F>
     void traverse_impl(const node* cur, F& func, const traversal_order& order) const;
 
-    std::unique_ptr<node> copy_impl(const node* cur);
+    std::unique_ptr<node> copy_impl(const node* cur) const;
 
     const node* find_node(const T& value) const;
 
@@ -52,7 +52,7 @@ public:
     binary_search_tree(binary_search_tree&& other) noexcept : root_(std::move(other.root_)) {};
 
     binary_search_tree& operator=(const binary_search_tree& other);
-    binary_search_tree& operator=(binary_search_tree&& other);
+    binary_search_tree& operator=(binary_search_tree&& other) noexcept;
 
     bool operator==(const binary_search_tree<T>& other) const;
 
@@ -218,7 +218,7 @@ size_t binary_search_tree<T>::size() const {
 
 template <class T>
 std::unique_ptr<typename binary_search_tree<T>::node>
-binary_search_tree<T>::copy_impl(const node* cur) {
+binary_search_tree<T>::copy_impl(const node* cur) const {
     if (!cur) return nullptr;
 
     auto copy = std::make_unique<node>(cur->value_);
@@ -317,7 +317,7 @@ bool binary_search_tree<T>::contains_subtree(const binary_search_tree<T>& other)
 template <class T>
 bool binary_search_tree<T>::operator==(const binary_search_tree<T>& other) const {
     if (this == &other) return true;
-    if (!root_ || !other.root_) return false;
+    if (!root_ || !other.root_) return !root_ && !other.root_;
 
     return *root_ == *other.root_;
 }
