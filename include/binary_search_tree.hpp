@@ -2,6 +2,7 @@
 #include <memory>
 #include <initializer_list>
 #include <cstddef>
+#include "array_sequence.hpp"
 
 template <class T>
 class binary_search_tree {
@@ -40,6 +41,8 @@ private:
 
     const node* find_node(const T& value) const;
 
+    std::unique_ptr<node> balance_rec(const array_sequence<T>& values, size_t left, size_t right);
+
 public:
     binary_search_tree() = default;
     explicit binary_search_tree(const T& value) : root_(std::make_unique<node>(value)) {};
@@ -76,6 +79,8 @@ public:
 
     binary_search_tree<T> extract_subtree(const T& value) const;
     bool contains_subtree(const binary_search_tree<T>& other) const;
+
+    void balance();
 };
 
 template <class T>
@@ -315,4 +320,30 @@ bool binary_search_tree<T>::operator==(const binary_search_tree<T>& other) const
     if (!root_ || !other.root_) return false;
 
     return *root_ == *other.root_;
+}
+
+template <class T>
+std::unique_ptr<typename binary_search_tree<T>::node> binary_search_tree<T>::balance_rec(const array_sequence<T>& values, size_t left, size_t right) {
+    if (left >= right) return nullptr;
+
+    size_t mid = left + (right - left) / 2;
+
+    auto cur = std::make_unique<node>(values[mid]);
+
+    cur->left = balance_rec(values, left, mid);
+    cur->right = balance_rec(values, mid + 1, right);
+
+    return cur;
+}
+
+template <class T>
+void binary_search_tree<T>::balance() {
+    array_sequence<T> values(size());
+    size_t index = 0;
+
+    traverse([&](const T& value) {
+        values[index++] = value;
+    }, traversal_order::LKP);
+
+    root_ = balance_rec(values, 0, values.size());
 }
